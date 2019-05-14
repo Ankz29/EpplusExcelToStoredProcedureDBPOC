@@ -13,6 +13,8 @@ using System.Text;
 using System.Data.SqlClient;
 using System.Data;
 using EpplusPOC;
+using System.Xml.Serialization;
+using System.Xml;
 
 
 namespace EpplusPOC.Controllers
@@ -21,85 +23,53 @@ namespace EpplusPOC.Controllers
     {
         //
         // GET: /Epplus/
-        public ActionResult Index()
+        public  ActionResult Index()
         {
+           
             string fileName = "D:\\Practice\\PtacNewDealers.xlsx";
-            //string conString = string.Empty;
-            //conString = ConfigurationManager.ConnectionStrings["constr"].ConnectionString;
             ExcelUtility excelutility = new ExcelUtility();
 
             List<EpplusModel> resulatantData = excelutility.loadData(fileName);
             String strConnString = ConfigurationManager.ConnectionStrings["conString"].ConnectionString;
 
+            //command to truncate the previous data from Database//
             SqlConnection con = new SqlConnection(strConnString);
-                            
-                                String TruncateQuery = "DELETE FROM PtacDealer_TB";
-                                SqlCommand command = new SqlCommand(TruncateQuery, con);
+            //String TruncateQuery = "DELETE FROM PtacDealer_TB";
+            //SqlCommand command = new SqlCommand(TruncateQuery, con);
 
-                                con.Open();
-                                command.ExecuteNonQuery();
-                                con.Close();
-
-            //SqlConnection con = new SqlConnection(strConnString);
-
-           
             con.Open();
-            
+            //command.ExecuteNonQuery();
+            //con.Close();
+            //con.Open();
+
             try
-            {              
-               
-                foreach (var item in resulatantData)
-                {
-                    SqlCommand cmd = new SqlCommand();
-
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.CommandText = "spInsertPtacDealersInfo";
-
-                    cmd.Parameters.Add("@DealerName", SqlDbType.VarChar).Value = item.DealerName;
-
-                    cmd.Parameters.Add("@Address", SqlDbType.VarChar).Value = item.Address;
-
-                    cmd.Parameters.Add("@City", SqlDbType.VarChar).Value = item.City;
-
-                    cmd.Parameters.Add("@State", SqlDbType.VarChar).Value = item.State;
-
-                    cmd.Parameters.Add("@ZipCode", SqlDbType.VarChar).Value = item.ZipCode;
-
-                    cmd.Parameters.Add("@PhoneNumber", SqlDbType.VarChar).Value = item.PhoneNumber;
-
-                    cmd.Parameters.Add("@PhoneNumber2", SqlDbType.VarChar).Value = item.PhoneNumber2;
-
-                    cmd.Connection = con;
-                    cmd.ExecuteNonQuery();
-                    //con.Close();
-
-                    //try
-                    //{
-                    //    con.Open();
-                    //    cmd.ExecuteNonQuery();
-                    //}
-                    //finally
-                    //{
-                    //    con.Close();
-                    //}
-                }
-            }
-            catch (Exception)
             {
-                
-                throw;
+                //method to serialize List of data to XML//
+                var model = new EpplusModel();
+                var xmlData = model.serializeXml(resulatantData);                   
+                   SqlCommand cmd = new SqlCommand();
+                   cmd.CommandType = CommandType.StoredProcedure;
+                   cmd.CommandText = "spInsertPtacDealersXmlInfo";
+                   cmd.Parameters.Add("@dealersXml", SqlDbType.Xml).Value = xmlData;
+                   cmd.Connection = con;
+                   cmd.ExecuteNonQuery();
+            }
+
+            catch (Exception ex)
+            {
+                throw ex;
             }
 
             finally
             {
-
-                con.Close();                
-
+                con.Close();
             }
-                return View(resulatantData);
-            }
+            return View(resulatantData);
         }
+
+
+       
     }
+}
 
 

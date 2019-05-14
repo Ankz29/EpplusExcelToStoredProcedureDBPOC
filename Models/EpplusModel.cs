@@ -10,50 +10,21 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace EpplusPOC.Models
 {
     public class EpplusModel
-    {
-        //public string _Description;
-        public string DealerName
-        {
-            get;
-            set;
-            //get
-            //{
-            //    if(!String.IsNullOrEmpty(_Description))
-            //        return ConvertToPascalCase(_Description);
-            //    return null;
-            //}
-            //set
-            //{
-            //    _Description = value;
-            //}
-        }
+    {     
+        public string DealerName { get; set; }        
         public string Address { get; set; }
         public string City { get; set; }
         public string State { get; set; }
         public string ZipCode { get; set; }
-
-        //public string _phoneNumber;
-        public string PhoneNumber
-        {
-            get;
-            set;
-            //get { return GetPhoneNumber(_phoneNumber); }
-            //set { _phoneNumber = PhoneNumber; }
-        }
-
-        //public string _phoneNumber2;
-        public string PhoneNumber2
-        {
-            get;
-            set;
-            //get { return GetPhoneNumber(PhoneNumber2); }
-            //set{ _phoneNumber2 = PhoneNumber2; }
-        }
-
+        public string PhoneNumber { get; set; }
+        public string PhoneNumber2 { get; set; }
+        
         //method to convert DealerName to Pascal Case & format DealerName as per requirement//
         public string ConvertToPascalCase(string DealerName)
         {
@@ -93,56 +64,38 @@ namespace EpplusPOC.Models
         {
             string formattedNumber;
             string result = Regex.Replace(number, "[^0-9a-zA-Z]+", "");
-             if (string.IsNullOrEmpty(result))
+            if (string.IsNullOrEmpty(result))
             {
                 return number = "";
             }
-             else if (result != "NULL" && result.Length >= 10 )
+            else if (result != "NULL" && result.Length >= 10)
             {
 
                 formattedNumber = "(" + result.Substring(0, 3) + ")" + " " + result.Substring(3, 3) + " " + "-" + " " + result.Substring(6, 4);
             }
-
-            
             else
             {
                 return number = "";
             }
-
             return formattedNumber;
         }
 
-        
-        //public List<EpplusModel> loadData(string excelPath)
-        //{
-        //   var modelData = new List<EpplusModel>();
-        //   FileInfo filePath = new FileInfo(excelPath);
-        //    {
-        //        using (ExcelPackage package = new ExcelPackage(filePath))
-        //        {
-        //            ExcelWorksheet workSheet = package.Workbook.Worksheets["Sheet1"]; //excel sheet name//
-        //            int totalRows = workSheet.Dimension.Rows;
-                   
-        //            for (int i = 2; i <= totalRows; i++)
-        //            {
-        //                modelData.Add(new EpplusModel
-        //                {
-        //                    //addressid = !string.IsNullOrEmpty(i.addressid) ? i.addressid : ""
-        //                    Description = ConvertToPascalCase(workSheet.Cells[i, 2].Value.ToString().Trim()),
-        //                    Address = workSheet.Cells[i, 3].Value.ToString().Trim(),
-        //                    City = workSheet.Cells[i, 4].Value.ToString().Trim(),
-        //                    State = workSheet.Cells[i, 5].Value.ToString().Trim(),
-        //                    ZipCode = workSheet.Cells[i, 6].Value.ToString().Trim(),
-        //                    PhoneNumber = GetPhoneNumber(workSheet.Cells[i, 7].Value.ToString().Trim()), //call the variable in place of calling method, make use of getter & setter methods to server the functionality//
-        //                    PhoneNumber2 =GetPhoneNumber( workSheet.Cells[i, 8].Value.ToString().Trim())
-        //                });
-        //            }
-
-
-        //        }
-
-        //    }
-        //    return modelData;
-        //}
+        public string serializeXml(List<EpplusModel> data)
+        {
+            //Represents an XML document,
+            XmlDocument xmlDoc = new XmlDocument();
+            // Initializes a new instance of the XmlDocument class.          
+            XmlSerializer xmlSerializer = new XmlSerializer(data.GetType());
+            // Creates a stream whose backing store is memory. 
+            using (MemoryStream xmlStream = new MemoryStream())
+            {
+                xmlSerializer.Serialize(xmlStream, data);
+                //gets or sets position of stream//
+                xmlStream.Position = 0;
+                //Loads the XML document from the specified string.
+                xmlDoc.Load(xmlStream);
+                return xmlDoc.InnerXml;
+            }
+        }
     }
 }
