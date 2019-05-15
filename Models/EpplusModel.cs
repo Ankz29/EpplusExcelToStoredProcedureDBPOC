@@ -80,22 +80,6 @@ namespace EpplusPOC.Models
             return formattedNumber;
         }
 
-        public string serializeXml(List<EpplusModel> data)
-        {
-            //Represents an XML document,
-            XmlDocument xmlDoc = new XmlDocument();
-            // Initializes a new instance of the XmlDocument class.          
-            XmlSerializer xmlSerializer = new XmlSerializer(data.GetType());
-            // Creates a stream whose backing store is memory. 
-            using (MemoryStream xmlStream = new MemoryStream())
-            {
-                xmlSerializer.Serialize(xmlStream, data);
-                //gets or sets position of stream//
-                xmlStream.Position = 0;
-                //Loads the XML document from the specified string.
-                xmlDoc.Load(xmlStream);
-                return xmlDoc.InnerXml;
-            }
-        }
+       
     }
 }

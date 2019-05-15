@@ -125,6 +125,7 @@
     </Compile>
     <Compile Include="Models\EpplusModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />

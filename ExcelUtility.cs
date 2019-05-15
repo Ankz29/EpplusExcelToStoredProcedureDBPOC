@@ -5,12 +5,15 @@ using System.Web;
 using EpplusPOC.Models;
 using OfficeOpenXml;
 using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace EpplusPOC
 {
-    public class ExcelUtility
+    public static class ExcelUtility
     {
-        public List<EpplusModel> loadData(string excelPath)
+
+        public static List<EpplusModel> retrieveExcelData(string excelPath)
         {
             var modelData = new List<EpplusModel>();
             FileInfo filePath = new FileInfo(excelPath);
@@ -40,7 +43,36 @@ namespace EpplusPOC
                 }
 
             }
+
+           
             return modelData;
         }
+
+        //extension method//
+         public static string toXmlExtension(this  List<EpplusModel> resultantData)
+        {
+
+            var xmlSerializedData = serializeToXml(resultantData);
+            return xmlSerializedData;
+        }
+
+         //method to serialize List of data to XML//
+         public static string serializeToXml(List<EpplusModel> resultantData)
+         {
+             //Represents an XML document,
+             XmlDocument xmlDoc = new XmlDocument();
+             // Initializes a new instance of the XmlDocument class.          
+             XmlSerializer xmlSerializer = new XmlSerializer(resultantData.GetType());
+             // Creates a stream whose backing store is memory. 
+             using (MemoryStream xmlStream = new MemoryStream())
+             {
+                 xmlSerializer.Serialize(xmlStream, resultantData);
+                 //gets or sets position of stream//
+                 xmlStream.Position = 0;
+                 //Loads the XML document from the specified string.
+                 xmlDoc.Load(xmlStream);
+                 return xmlDoc.InnerXml;
+             }
+         }
     }
 }
